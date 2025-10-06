@@ -1,138 +1,136 @@
-# Required libraries
-if (!requireNamespace("readr", quietly = TRUE)) install.packages("readr")
-if (!requireNamespace("dplyr", quietly = TRUE)) install.packages("dplyr")
-if (!requireNamespace("parallel", quietly = TRUE)) install.packages("parallel")
-if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
-if (!requireNamespace("lme4", quietly = TRUE)) install.packages("lme4")
-if (!requireNamespace("multivarious", quietly = TRUE)) install.packages("multivarious")
+# ===============================================================
+# Motion Profiling: Variance Explained (R²) Analysis by Motion PCs
+# ---------------------------------------------------------------
+# This script performs linear regression analyses to estimate the
+# proportion of variance (R²) in brain ROI measures explained by
+# five motion principal components (PC1–PC5) across multiple datasets.
+#
+# For each dataset (.csv):
+#   - Residualizes ROI data for covariates (sex, age, age², TIV)
+#   - Standardizes numeric variables
+#   - Fits linear models of each ROI ~ PC1 + ... + PC5
+#   - Computes adjusted R², p-values, and permutation-based empirical p-values
+#   - Performs FDR correction
+#
+# Outputs:
+#   - One CSV per dataset per analysis (cortical / subcortical ROIs)
+#     containing regression statistics and permutation results.
+#
+# Author: Roberta Passiatore
+# Updated: 2025-08-28
+# ===============================================================
 
-library(readr)
-library(dplyr)
-library(parallel)
-library(ggplot2)
-library(lme4)
-#library(lmerTest)
-library(reshape2)
-library(multivarious)
+# ---- Packages ----
+req <- c("readr","dplyr","parallel","ggplot2","lme4","multivarious")
+to_install <- req[!sapply(req, requireNamespace, quietly = TRUE)]
+if (length(to_install)) install.packages(to_install, dependencies = TRUE)
+lapply(req, library, character.only = TRUE)
 
-lmp <- function (modelobject) {
-  if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
-  f <- summary(modelobject)$fstatistic
-  p <- pf(f[1],f[2],f[3],lower.tail=F)
-  attributes(p) <- NULL
-  return(p)
+# ---- Config ----
+input_dir  <- "/documents/Roberta/MotionProfiling/NC_LinearMotionEffects"
+output_dir <- "/documents/Roberta/MotionProfiling/NC_LinearMotionEffects/results"
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
+set.seed(1234)
+n_perm <- 5000
+use_parallel <- TRUE
+n_cores <- max(1, parallel::detectCores() - 1)
+
+pc_cols <- c("PC1","PC2","PC3","PC4","PC5")
+covars  <- c("sex","age","agesq","TIV")
+roi_cortical_idx    <- 12:111
+roi_subcortical_idx <- 112:119
+
+# ---- Helpers ----
+get_dataset_name <- function(file) sub("\\.csv$", "", basename(file))
+
+lmp <- function(model) {
+  if (!inherits(model, "lm")) stop("Not an 'lm' object.")
+  f <- summary(model)$fstatistic
+  as.numeric(pf(f[1], f[2], f[3], lower.tail = FALSE))
 }
 
-# List of datasets
-setwd("/documents/Roberta/MotionProfiling/NC_LinearMotionEffects")
-datasets <- list.files(pattern = ".csv")
-res.dir = "/dcouments/Roberta/MotionProfiling/NC_LinearMotionEffects/results/"
-
-# Function to extract dataset name without extension
-get_dataset_name <- function(file) {
-  sub("\\.csv$", "", basename(file))
-}
-
-
-# Analysis function
-run_analysis <- function(data, dataset_name, start_col, end_col, suffix) {
-  results <- data.frame(Dataset = character(),
-                        ROI = character(),
-                        Analysis = character(),
-                        p_value = numeric(),
-                        R = numeric(),
-                        SE = numeric(),
-                        Empirical_p_value = numeric(),
-                        #Cohens_d = numeric(),
-                        Avg_R = numeric(),
-                        stringsAsFactors = FALSE)
-  
-  model_specs <- list(
-    allcov = ~ PC1 + PC2 + PC3 + PC4 + PC5, #sex + age + agesq + TIV 
-  )
-  
-  standard_cohens_d <- numeric()
-  avg_cohens_d_corrected <- numeric()
-  
-  # Analysis loop
-  for (i in start_col:end_col) {
-    roi_name <- colnames(data)[i]
-    
-    for (model_type in names(model_specs)) {
-      formula <- as.formula(paste(roi_name, deparse(model_specs[[model_type]])))
-      model <- lm(formula, data = data)
-      model_summary <- summary(model)
-      p_value_original = lmp(model)
-      SE = model_summary$sigma
-      R = model_summary$adj.r.squared
-      
-      if (model_type == "allcov") {
-        permuted_Rs <- numeric(5000)
-        #cohen_d_values <- numeric(5000)
-        
-        for (j in 1:5000) {
-          shuffled_data <- data
-          shuffled_data[c("PC1",'PC2','PC3','PC4',"PC5")] <- lapply(shuffled_data[c("PC1",'PC2','PC3','PC4',"PC5")], sample)
-          
-          perm_model <- lm(formula, data = shuffled_data)
-          perm_R <- summary(perm_model)$adj.r.squared
-          
-          permuted_Rs[j] <- perm_R
-        }
-        
-        empirical_p_value <- mean(abs(permuted_Rs) >= abs(R))
-        avg_Rs <- mean(permuted_Rs)
-      } else {
-        empirical_p_value <- NA
-        avg_Rs <- NA
-      }
-      
-      results <- rbind(results, data.frame(Dataset = dataset_name,
-                                           ROI = roi_name,
-                                           Analysis = model_type,
-                                           p_value = p_value_original,
-                                           R = R,
-                                           SE = SE,
-                                           Empirical_p_value = empirical_p_value,
-                                           #Cohens_d = cohens_d,
-                                           Avg_R = avg_Rs))
-      
-    }
+perm_adjR2 <- function(y, X, n_perm, parallel = TRUE, n_cores = 1) {
+  n <- length(y)
+  p <- ncol(X) + 1
+  fit_adjR2 <- function(y, X) {
+    m <- lm.fit(x = cbind(1, as.matrix(X)), y = y)
+    rss <- sum(residuals.lm(m)^2)
+    tss <- sum((y - mean(y))^2)
+    r2 <- 1 - rss / tss
+    1 - (1 - r2) * (n - 1) / (n - p)
   }
-  
-  results$pFDR <- p.adjust(results$p_value, method = "fdr")
-  results = results[-which(results$Analysis=='onecov'),]
-  
-  # Write results to CSV file in append mode
-  write.table(results, paste0(res.dir, "regression_results_allPC_permutations_", suffix, dataset_name, ".csv"), 
-              row.names = FALSE, col.names = !file.exists(paste("regression_results_allPC_permutations_", suffix, ".csv", sep="")), 
-              sep = ",", append = TRUE)
-  
+  worker <- function(i) {
+    Xperm <- as.data.frame(lapply(X, sample))
+    fit_adjR2(y, Xperm)
+  }
+  if (!parallel) vapply(seq_len(n_perm), worker, numeric(1))
+  else if (.Platform$OS.type == "unix")
+    parallel::mclapply(seq_len(n_perm), worker, mc.cores = n_cores) |> unlist()
+  else {
+    cl <- parallel::makeCluster(n_cores)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    parallel::parLapply(cl, seq_len(n_perm), worker) |> unlist()
+  }
 }
 
-# Loop through each dataset
-for (dataset in datasets) {
-  #dataset = datasets[1]
-  data <- read_csv(dataset)
-  dataset_name <- get_dataset_name(dataset)
-  data$group = as.factor(data$group)
-  data$sex = as.factor(data$sex)
-  data$ID = as.factor(data$ID)
-  
-  # Standardize numeric columns
-  numeric_columns <- sapply(data, is.numeric)
-  data_standardized <- data
-  data_standardized[,c(12:119)] = residualize(~sex + age + agesq + TIV, data_standardized[,c(12:119)], data_standardized) 
-  data_standardized[numeric_columns] <- scale(data[numeric_columns])
-  #data_melt = melt(data_standardized, measure.vars = paste0('PC',1:5), variable.name='PC.ID' , value.name =  'PC')
-  #data_melt$Subject = rep(1:length(data_standardized$ID),5)
-  #data_standardized$PC = rowMeans(data_standardized[,c(7:11)])
-  
-  
-  # Run analysis for cortical ROIs
-  run_analysis(data_standardized, dataset_name, 12, 111, "corticalROI")
-  
-  # Run analysis for subcortical ROIs
-  run_analysis(data_standardized, dataset_name, 112, 119, "subcorticalROI")
+run_analysis <- function(df, dataset_name, roi_idx, suffix) {
+  out <- vector("list", length(roi_idx))
+  Xpcs <- df[, pc_cols, drop = FALSE]
+  for (ii in seq_along(roi_idx)) {
+    col_id <- roi_idx[ii]
+    roi_name <- colnames(df)[col_id]
+    y <- df[[col_id]]
+    form <- as.formula(paste(roi_name, "~", paste(pc_cols, collapse = " + ")))
+    model <- lm(form, data = df)
+    smry  <- summary(model)
+    p_val <- lmp(model)
+    adjR  <- smry$adj.r.squared
+    se    <- smry$sigma
+    perm_Rs <- perm_adjR2(y, Xpcs, n_perm, parallel = use_parallel, n_cores = n_cores)
+    emp_p <- mean(abs(perm_Rs) >= abs(adjR))
+    avg_R <- mean(perm_Rs)
+    out[[ii]] <- data.frame(
+      Dataset = dataset_name,
+      ROI = roi_name,
+      Analysis = "allcov",
+      p_value = p_val,
+      R = adjR,
+      SE = se,
+      Empirical_p_value = emp_p,
+      Avg_R = avg_R,
+      stringsAsFactors = FALSE
+    )
+  }
+  res <- dplyr::bind_rows(out)
+  res$pFDR <- p.adjust(res$p_value, method = "fdr")
+  fname <- file.path(output_dir, sprintf("regression_results_allPC_permutations_%s_%s.csv", suffix, dataset_name))
+  readr::write_csv(res, fname)
+  message("Wrote: ", fname)
+  invisible(res)
 }
 
+# ---- Main Loop ----
+files <- list.files(input_dir, pattern = "\\.csv$", full.names = TRUE)
+if (!length(files)) stop("No CSV files found in: ", input_dir)
+
+for (f in files) {
+  message("Processing: ", basename(f))
+  data <- readr::read_csv(f, show_col_types = FALSE)
+  dataset_name <- get_dataset_name(f)
+  for (fac in c("group","sex","ID")) {
+    if (fac %in% names(data)) data[[fac]] <- as.factor(data[[fac]])
+  }
+  data_std <- data
+  roi_all_idx <- unique(c(roi_cortical_idx, roi_subcortical_idx))
+  roi_all_idx <- roi_all_idx[roi_all_idx <= ncol(data_std)]
+  have_covs <- all(covars %in% names(data_std))
+  if (have_covs && length(roi_all_idx)) {
+    data_std[, roi_all_idx] <- multivarious::residualize(
+      stats::as.formula(paste("~", paste(covars, collapse = " + "))),
+      data_std[, roi_all_idx, drop = FALSE],
+      data_std
+    )
+  }
+  num_cols <- vapply(data_std, is.numeric, logical(1))
+  data_std[num_cols] <- lapply(data_std[num_cols], scale)_]()]()_
