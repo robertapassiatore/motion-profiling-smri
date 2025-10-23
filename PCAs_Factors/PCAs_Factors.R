@@ -1,3 +1,67 @@
+# ============================================================
+#  Script: PCA Decomposition and Motion Parameter Analysis
+#  Description: This script generates scree plots, loading heatmaps, and 
+#               correlation matrices of PCA components across scanning sessions
+#               for three cohorts included in the analysis (UNIBA1, UNIBA2, LIBD). Outputs include
+#               figures summarizing eigenvalues, loadings, and inter-scan 
+#               relationships among principal components.
+#
+#  Author: Nicola Sambuco
+#  
+#
+#  Copyright (c) 2025 Roberta Passiatore, Nicola Sambuco, Giuseppe Stofa
+#
+#  ------------------------------------------------------------
+#  Input:
+#    - "UNIBA1_Eigenvalues.Variance.txt" : PCA eigenvalues and cumulative variance
+#    - "UNIBA2_Eigenvalues.Variance.txt"
+#    - "LIBD_Eigenvalues.Variance.txt"
+#    - "UNIBA1_PCs.txt" : PCA loadings per motion parameter and scan
+#    - "UNIBA2_PCs.txt"
+#    - "LIBD_PCs.txt"
+#    - "UNIBA1_Loadings.Corr.txt" : correlation matrices of PCA loadings
+#    - "UNIBA2_Loadings.Corr.txt"
+#    - "LIBD_Loadings.Corr.txt"
+#
+#  Output:
+#    - Combined scree plots:          "Figure1_ScreePlots.png"
+#    - Combined heatmaps:             "Figure1_Loadings.png"
+#    - Full combined figure panels:   "Figure1_Complete_Panels.png"
+#
+#  Expected Runtime:
+#    ~5–10 minutes on a standard workstation 
+#    (≥16 GB RAM, 4 cores), depending on dataset size.
+#
+#  Dependencies:
+#    - R version ≥ 4.2
+#    - Required packages: ggplot2, gridExtra, patchwork, reshape2, Hmisc, dplyr
+#
+#  ------------------------------------------------------------
+#  License: MIT License
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
+#
+#  Note: Summary-level data shared in this repository are released under the 
+#  Creative Commons Attribution 4.0 International (CC BY 4.0) for academic and non-commercial use. 
+#  Please cite the associated publication when using this code or data.
+# ============================================================
+
+
 # Check for and install required packages
 packages <- c("ggplot2", "gridExtra", "patchwork", "reshape2", "Hmisc", "dplyr")
 new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
