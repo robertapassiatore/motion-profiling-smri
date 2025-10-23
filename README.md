@@ -7,3 +7,12 @@ Contacts:
 robertapassiatore0@gmail.com
 nicola.sambuco@uniba.it
 giuseppe.stolfa@uniba.it
+
+## License
+- **Code:** MIT License © 2025 Roberta Passiatore, Nicola Sambuco, Giuseppe Stolfa  
+- **Summary data:** Creative Commons Attribution 4.0 International (CC BY 4.0)  
+  https://creativecommons.org/licenses/by/4.0/
+
+Please cite: Passiatore, R., Sambuco, N., Stolfa, G., et al., *Estimated Head Motion Contributes to Case-Control Magnetic Resonance Imaging Morphometry Differences in Schizophrenia*, Under review, 2025.
+
+**Corresponding author:** Giulio Pergola, Lieber Institute for Brain Development/University of Bari Aldo Moro, giulio.pergola@uniba.it
