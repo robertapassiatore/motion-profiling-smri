@@ -6,14 +6,14 @@ Roberta Passiatore, Nicola Sambuco, Giuseppe Stolfa, Linda A. Antonucci, Alessan
 Contacts: robertapassiatore0@gmail.com · nicola.sambuco@uniba.it · giuseppe.stolfa@uniba.it  
 
 
-In R (version ≥ 4.2) or RStudio, ensure your working directory is this repository root, then run (in order):  
+In R (version ≥ 4.2) or RStudio, ensure your working directory is this repository root, then run (in order) the code in the following folders:  
 1. PCAs_Factors
 2. NC_MotionEffects
 3. NCvsSCZ_MotionCorrection
 4. NCvsBD_MotionCorrection
 
 ## License
-- **Code:** MIT License © 2025 Roberta Passiatore, Nicola Sambuco, Giuseppe Stolfa  
+- **Code:** MIT License © 2025 Lieber Institute for Brain Development, University of Bari Aldo Moro
 - **Summary data:** Creative Commons Attribution 4.0 International (CC BY 4.0)  
   https://creativecommons.org/licenses/by/4.0/
 
