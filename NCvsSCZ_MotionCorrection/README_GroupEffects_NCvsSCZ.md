@@ -18,7 +18,7 @@ To obtain meta-analytic statistics across datasets and sessions, a **mixed-effec
 
 - `metanalisi-niftii_SCZ.R`
 
-**Note:** NIfTI files corresponding to the effects shown in *Figure 5a–b* are included in this folder.  
+**Note:** NIfTI files for tmaps and se for all cohorts are provided. NIfTI files corresponding to the effects shown in *Figure 5a–b* are included in this folder.  
 The figure was generated using **MRIcroGL**.
 
 ---
@@ -36,7 +36,7 @@ To obtain meta-analytic statistics across datasets and sessions, a **mixed-effec
 - `ROIs_GroupEffect_metanalysis_SCZ.R`
 
 
-**Note:** CSV files of the effects shown in *Figure 6* are included in this folder.  
+**Note:** CVS files reporting regression results for all cohorts are provided. CSV files of the effects shown in *Figure 6* are included in this folder.  
 The figure was generated using **ggseg** and code `plot_GroupDiff_NCvsSCZvsBD.R`
 
 ---
