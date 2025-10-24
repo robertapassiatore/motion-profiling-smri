@@ -25,6 +25,40 @@ library(RNifti)
 
 # ---- Inputs ----
 p_paths <- c(
-  "/Volumes/HD2/PROJECTS/RP_MotionProfiling/vbm_nc/results/UNIBA2/FI/pval_0001.nii",
-  "/Volumes/HD2/PROJECTS/RP_MotionProfiling/vbm_nc/results/HCP/FI/pval_0001.nii",
-  "/Volumes/HD2/PROJECTS/RP_MotionProfiling/vbm_nc/results/DNS/FI/pval_0001._
+  "~/data/UNIBA2/RS/pval_0001.nii",
+  "~/data/HCP/RS/pval_0001.nii",
+  "~/data/DNS/RS/pval_0001._
+
+# --- Path to binary mask ---
+mask_path <- "~/Data/rrGM_cat12_bin.nii"
+r2_path = "~/Data/mean_r2_0001_RS.nii"
+
+# --- Load mask and get voxel indices ---
+mask <- readNifti(mask_path)
+mask_idx <- which(mask > 0)
+
+# --- Load p-value maps ---
+p_maps <- lapply(p_paths, readNifti)
+
+# --- Extract p-values inside the mask ---
+p_vals_list <- lapply(p_maps, function(p) {
+  p_values <- p[mask_idx]
+  # Avoid log(0) by replacing zero or negative p-values with smallest non-zero float
+  p_values[p_values <= 0] <- .Machine$double.eps
+  return(p_values)
+})
+
+# --- Apply Fisher's method ---
+k <- length(p_vals_list) - 1 
+logsum <- Reduce(`+`, lapply(p_vals_list, function(p) -2 * log(p)))
+fisher_stat <- logsum
+fisher_pvals <- pchisq(fisher_stat, df = 1 * k, lower.tail = FALSE)
+
+# --- Create output array ---
+combined_map <- array(NA_real_, dim = dim(mask))
+combined_map[mask_idx] <- fisher_pvals
+
+# --- Save output map ---
+combined_nifti <- asNifti(combined_map, reference = p_maps[[1]])
+writeNifti(combined_nifti, "~/results/fisher_pval_0001_RS.nii.gz")
+

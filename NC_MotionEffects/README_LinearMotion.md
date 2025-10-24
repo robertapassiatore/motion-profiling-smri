@@ -27,7 +27,7 @@ To combine *p*-values voxel-wise across multiple datasets, the script implementi
 
 - `VBM_sumup_pvals.R`
 
-**Note:** NIfTI files of the effects shown in *Figure 3* are included in this folder.  
+**Note:** Example input NIfTI files from the HCP and CNP datasets are included. NIfTI files of the effects shown in *Figure 3* are included in this folder.  
 The figure was generated using **MRIcroGL**.
 
 ---
@@ -44,7 +44,7 @@ To combine ROI-based *p*-values across multiple datasets, the script implementin
 
 - `ROI_LinearEffectPCs_metap.R`
 
-**Note:** CSV files of the effects shown in *Figure 4* are included in this folder.  
+**Note:** Example CSV files from the HCP and CNP datasets are included. CSV files of the effects shown in *Figure 4* are included in this folder.  
 The figure was generated using **ggseg**.
 
 

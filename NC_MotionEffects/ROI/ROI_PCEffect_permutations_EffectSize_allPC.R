@@ -16,6 +16,8 @@
 #   - One CSV per dataset per analysis (cortical / subcortical ROIs)
 #     containing regression statistics and permutation results.
 #
+# Execution time: ~5 minutes/dataset depending on the size
+#
 # Author: Roberta Passiatore
 # Updated: 2025-08-28
 # ===============================================================
@@ -27,8 +29,8 @@ if (length(to_install)) install.packages(to_install, dependencies = TRUE)
 lapply(req, library, character.only = TRUE)
 
 # ---- Config ----
-input_dir  <- "/documents/Roberta/MotionProfiling/NC_LinearMotionEffects"
-output_dir <- "/documents/Roberta/MotionProfiling/NC_LinearMotionEffects/results"
+input_dir  <- "~/data"
+output_dir <- "/results"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 set.seed(1234)

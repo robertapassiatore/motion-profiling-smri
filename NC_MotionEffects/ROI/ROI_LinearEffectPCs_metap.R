@@ -20,7 +20,7 @@ library(readr)
 library(dplyr)
 
 # ---- Config ----
-res.dir        <- "~/Documents/Motion-Profiling/analyses/NC_LinearMotionEffects/results/"
+res.dir        <- "~/results/"
 pattern_kind   <- "corticalROI"                    # match your expected file
 sessions_keep  <- c("RS","FI","WM")                # sessions to include
 use_empirical  <- FALSE                            # TRUE => combine Empirical_p_value instead of p_value
