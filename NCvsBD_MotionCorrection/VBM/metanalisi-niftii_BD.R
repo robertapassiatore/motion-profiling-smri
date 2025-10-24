@@ -9,9 +9,9 @@
 #   Optionally, extract cluster peaks from a thresholded map.
 #
 # Inputs (example layout):
-#   - T-maps:   /.../tmaps_GroupEffect/BD/tmaps/r*_PCA*.nii.gz # alternative file noPCA
-#   - SE maps:  /.../tmaps_GroupEffect/BD/se/r*_PCA*.nii.gz # alternative file noPCA
-#   - Mask:     /.../tmaps_GroupEffect/rGM_cat12_bin.nii.gz
+#   - T-maps:   /.../data/tmaps/r*_PCA*.nii.gz # alternative file noPCA
+#   - SE maps:  /.../data/se/r*_PCA*.nii.gz # alternative file noPCA
+#   - Mask:     /.../data/rGM_cat12_bin.nii.gz
 #   - Sample sizes file: res_BD.csv with columns: study, session, N
 #
 # Outputs (written to output_dir):
@@ -60,11 +60,11 @@ check_geom_match <- function(ref_header, arr_list) {
 }
 
 # ---- Paths / IO ----
-tmap_dir  <- "/Volumes/HD2/PROJECTS/RP_MotionProfiling/tmaps_GroupEffect/BD/tmaps"
-se_dir    <- "/Volumes/HD2/PROJECTS/RP_MotionProfiling/tmaps_GroupEffect/BD/se"
-mask_path <- "/Volumes/HD2/PROJECTS/RP_MotionProfiling/tmaps_GroupEffect/rGM_cat12_bin.nii.gz"
-sample_csv <- "/Volumes/HD2/PROJECTS/RP_MotionProfiling/tmaps_GroupEffect/res_BD.csv"
-output_dir <- "/Volumes/HD2/PROJECTS/RP_MotionProfiling/tmaps_GroupEffect/BD"
+tmap_dir  <- "~/data/tmaps"
+se_dir    <- "~/data/se"
+mask_path <- "~/data//rGM_cat12_bin.nii.gz"
+sample_csv <- "~/data/res_BD.csv"
+output_dir <- "/results"
 
 tmap_files <- list.files(tmap_dir, pattern = glob2rx("r*_PCA*.nii.gz"), full.names = TRUE)
 se_files   <- list.files(se_dir,   pattern = glob2rx("r*_noPCA*.nii.gz"), full.names = TRUE)
@@ -203,16 +203,12 @@ to_nifti_like <- function(arr, template_hdr) {
 }
 
 z_nii     <- to_nifti_like(meta_z,    ref_hdr)
-p_nii     <- to_nifti_like(meta_p,    ref_hdr)
-pFDR_nii  <- to_nifti_like(meta_p_fdr,ref_hdr)
 pFDRt_nii <- to_nifti_like(meta_p_fdr_thr, ref_hdr)
-beta_nii  <- to_nifti_like(meta_beta, ref_hdr)
+
 
 writeNIfTI(z_nii,     file.path(output_dir, "meta_z_NCvsBD_PCA"))
-writeNIfTI(p_nii,     file.path(output_dir, "meta_p_NCvsBD_PCA"))
-writeNIfTI(pFDR_nii,  file.path(output_dir, "meta_pFDR_NCvsBD_PCA"))
 writeNIfTI(pFDRt_nii, file.path(output_dir, "meta_pFDR_thr_NCvsBD_PCA"))
-writeNIfTI(beta_nii,  file.path(output_dir, "meta_beta_NCvsBD_PCA"))
+
 
 cat("Saved NIfTI outputs to:", output_dir, "\n")
 

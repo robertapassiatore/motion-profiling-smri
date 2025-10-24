@@ -18,7 +18,7 @@ To obtain meta-analytic statistics across datasets and sessions, a **mixed-effec
 
 - `metanalisi-niftii_SCZ.R`
 
-**Note:** NIfTI files for tmaps and se for all cohorts are provided. NIfTI files corresponding to the effects shown in *Figure 5a–b* are included in this folder.  
+**Note:** NIfTI files of tmaps and se for all cohorts are provided. NIfTI files corresponding to the effects shown in *Figure 5a–b* are included in this folder.  
 The figure was generated using **MRIcroGL**.
 
 ---

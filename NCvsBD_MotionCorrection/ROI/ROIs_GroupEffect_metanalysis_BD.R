@@ -34,7 +34,7 @@ r2z <- function(r) {
 }
 
 # --- Setup ---
-res.dir <- "~/Documents/Motion-Profiling/analyses/NC_GroupEffects_NCvsBD/results/"
+res.dir <- "~/results/"
 setwd(res.dir)
 datasets <- list.files(pattern = "NCvsBD_permutations_corticalROI.*\\.csv$")
 

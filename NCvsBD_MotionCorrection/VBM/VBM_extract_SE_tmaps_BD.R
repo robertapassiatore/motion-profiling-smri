@@ -35,9 +35,9 @@ stop_if_mismatch <- function(a, b, what_a = "image A", what_b = "image B") {
 # 1) RESLICE ALL NIFTI FILES IN A FOLDER TO A REFERENCE (ANTsR)
 # ===============================================================
 reslice_cfg <- list(
-  input_dir      = "/Users/roberta.passiatore/Downloads/tmaps_GroupEffect/BD/con",
+  input_dir      = "~/data/con",
   output_prefix  = "r",
-  reference_path = "/Users/roberta.passiatore/Downloads/tmaps_GroupEffect/rGM_cat12_bin.nii.gz",
+  reference_path = "~/data/rGM_cat12_bin.nii.gz",
   pattern        = "nii.gz"
 )
 
@@ -62,10 +62,10 @@ if (RUN_RESLICING) {
 # 2) COMPUTE SE MAP FROM T-MAP AND BETA (CON) MAP: SE = beta / t
 # ===============================================================
 se_cfg <- list(
-  tmap_path   = "/Users/roberta.passiatore/Downloads/tmaps_GroupEffect/BD/tmaps/rUNIBA2_FI_PCA_spmT_0004_maskGM.nii.gz", # alterantive noPCA
-  beta_path   = "/Users/roberta.passiatore/Downloads/tmaps_GroupEffect/BD/con/UNIBA2_FI_PCA_con.nii.gz", # alterantive noPCA
-  mask_path   = "/Users/roberta.passiatore/Downloads/tmaps_GroupEffect/rGM_cat12_bin.nii.gz",
-  out_se_path = "UNIBA2_FI_PCA_SE.nii.gz", # alterantive noPCA
+  tmap_path   = "~/data/tmaps/rUNIBA2_FI_PCA_spmT_0004_maskGM.nii.gz", # alterantive noPCA
+  beta_path   = "~/data/con/UNIBA2_FI_PCA_con.nii.gz", # alterantive noPCA
+  mask_path   = "~/data/rGM_cat12_bin.nii.gz",
+  out_se_path = "UCLA_RS_PCA_SE.nii.gz", # alterantive noPCA
   eps         = 1e-6,  # for safe division
   se_cap_abs  = 1.0    # cap |SE| to avoid extreme/unstable values
 )

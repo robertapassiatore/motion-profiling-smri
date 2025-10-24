@@ -20,7 +20,7 @@ suppressPackageStartupMessages({
 })
 
 # -------------------- CONFIG --------------------
-input_dir <- "~/Documents/Motion-Profiling/analyses/NC_Percentiles_GroupDifferences"
+input_dir <- "~/data"
 output_dir <- file.path(input_dir, "results")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -32,7 +32,7 @@ use_permutations <- TRUE
 n_perm <- 500  # set to 5000 for final runs
 
 pc_cols <- c("PC1","PC2","PC3","PC4","PC5")
-covars  <- c("sex","age","agesq","TIV")
+covars  <- c("sex","age","agesq","TIV") #Site if needed
 group_col <- "group"   # expects levels like "1","2" (reference = first level)
 
 set.seed(1234)
