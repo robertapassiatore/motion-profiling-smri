@@ -80,21 +80,39 @@ fit_and_extract <- function(formula, data, group_col = "group") {
   )
 }
 
-empirical_p_for_group <- function(formula, data, pc_cols, observed_beta, n_perm = 500) {
-  if (!all(pc_cols %in% names(data))) return(NA_real_)
+empirical_p_for_group <- function(formula, data, observed_beta, n_perm = 500) {
+
   perm_b <- numeric(n_perm)
+  perm_d <- numeric(n_perm)
+
   for (i in seq_len(n_perm)) {
     dsh <- data
-    dsh[pc_cols] <- lapply(dsh[pc_cols], sample, replace = FALSE)
+    dsh$group <- sample(dsh$group, replace = FALSE)
+
     fit <- lm(formula, data = dsh)
     cm  <- coef(summary(fit))
     row <- get_group_coef_row(cm)
-    perm_b[i] <- if (!is.na(row)) as.numeric(cm[row, "Estimate"]) else NA_real_
+
+    if (!is.na(row)) {
+      beta_i <- as.numeric(cm[row, "Estimate"])
+      sigma_i <- sd(residuals.lm(fit))
+      perm_b[i] <- beta_i
+      perm_d[i] <- beta_i / sigma_i
+    } else {
+      perm_b[i] <- NA_real_
+      perm_d[i] <- NA_real_
+    }
   }
+
   perm_b <- perm_b[is.finite(perm_b)]
-  if (!length(perm_b)) return(NA_real_)
-  mean(abs(perm_b) >= abs(observed_beta))
+  perm_d <- perm_d[is.finite(perm_d)]
+
+  list(
+    empirical_p = if (length(perm_b)) mean(abs(perm_b) >= abs(observed_beta)) else NA_real_,
+    avg_d = if (length(perm_d)) mean(perm_d) else NA_real_
+  )
 }
+
 
 run_analysis <- function(df, dataset_name, roi_idx, suffix) {
   res_list <- vector("list", length(roi_idx))
@@ -114,16 +132,22 @@ run_analysis <- function(df, dataset_name, roi_idx, suffix) {
     # Corrected model + empirical p via PC permutations
     corr <- fit_and_extract(form_corr, df, group_col)
     emp_p <- NA_real_; avg_d <- NA_real_
+
+
     if (use_permutations && is.finite(corr$beta)) {
-      emp_p <- empirical_p_for_group(form_corr, df, pc_cols, corr$beta, n_perm)
-      # quick average Cohen's d across permutations (optional, mirrors original intent)
-      # compute via perm betas divided by residual SD of corrected model (fixed)
-      # For stability and speed, skip unless you truly need it.
-      avg_d <- NA_real_
+       perm_res <- empirical_p_for_group(
+       formula = form_corr,
+       data = df,
+       observed_beta = corr$beta,
+       n_perm = n_perm
+       )
+    emp_p <- perm_res$empirical_p
+    avg_d <- perm_res$avg_d
     }
 
-    # Keep only the "standard" line in the final table (to match original behavior)
-    # If you wish to keep both, add an extra row here for "corrected".
+
+    # Keep the "standard" and "corrected" lines in the final table 
+
     res_list[[ii]] <- data.frame(
       Dataset = dataset_name,
       ROI = roi_name,

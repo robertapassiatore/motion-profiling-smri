@@ -20,11 +20,11 @@ library(readr)
 library(dplyr)
 
 # ---- Config ----
-res.dir        <- "~/results/"
-pattern_kind   <- "corticalROI"                    # match your expected file
+res.dir        <- "~/results"
+pattern_kind   <- "subcorticalROI"                    # match your expected file
 sessions_keep  <- c("RS","FI","WM")                # sessions to include
 use_empirical  <- FALSE                            # TRUE => combine Empirical_p_value instead of p_value
-out_file       <- file.path(res.dir, "res.LinearEffect_allPC_corticalROI_metap.csv")
+out_file       <- file.path(res.dir, "res.LinearEffect_allPC_subcorticalROI_metap.csv")
 
 # ---- Helpers ----
 fisher_combine <- function(p) {
@@ -38,7 +38,7 @@ fisher_combine <- function(p) {
 # ---- Load all cortical files ----
 files <- list.files(
   res.dir,
-  pattern = paste0("^regression_results_allPC_permutations_", pattern_kind, "_.*\\.csv$"),
+  pattern = paste0("^regression_results_allPC_permutations_", pattern_kind, ".*\\.csv$"),
   full.names = TRUE
 )
 
@@ -49,7 +49,7 @@ all_data <- dplyr::bind_rows(lapply(files, function(fp) {
   base <- basename(fp)
   stem <- gsub(paste0("^regression_results_allPC_permutations_", pattern_kind, "_|\\.csv$"), "", base)
   parts <- unlist(strsplit(stem, "_"))
-  dat$Site    <- ifelse(length(parts) >= 1, parts[1], NA_character_)
+  dat$Site    <- ifelse(length(parts) >= 2, parts[1], NA_character_)
   dat$Session <- ifelse(length(parts) >= 2, parts[2], NA_character_)
   # keep only the full model if present
   if ("Analysis" %in% names(dat)) dat <- dplyr::filter(dat, Analysis == "allcov")
