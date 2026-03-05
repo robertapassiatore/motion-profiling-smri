@@ -17,6 +17,6 @@ In R (version ≥ 4.2) or RStudio, ensure your working directory is this reposit
 - **Summary data:** Creative Commons Attribution 4.0 International (CC BY 4.0)  
   https://creativecommons.org/licenses/by/4.0/
 
-Please cite: Passiatore, R., Sambuco, N., Stolfa, G., et al., *Estimated Head Motion Contributes to Case-Control Magnetic Resonance Imaging Morphometry Differences in Schizophrenia*, Under review, 2025.
+Please cite: Passiatore, R., Sambuco, N., Stolfa, G., et al., *Estimated Head Motion Contributes to Case-Control Magnetic Resonance Imaging Morphometry Differences in Schizophrenia*, https://www.medrxiv.org/content/10.64898/2026.03.04.26347600v1
 
 **Corresponding author:** Giulio Pergola, Lieber Institute for Brain Development/University of Bari Aldo Moro, giulio.pergola@uniba.it
