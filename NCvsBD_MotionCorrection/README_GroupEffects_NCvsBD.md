@@ -2,24 +2,8 @@
 # Group Effects Analysis – NC vs BD
 
 This folder contains scripts used to compute **group effects analysis** on grey matter volumes between **NC (controls)** and **SCZ (patients)**.  
-Separate code is provided for **ROI-based** and **VBM (voxel-based morphometry)** analyses.
+Separate code is provided for **ROI-based** analyses.
 
----
-
-## VBM Analysis
-
-### SE Map Estimation  
-To obtain voxel-wise standard error (SE) values, contrast images (*t*-maps) generated from **SPM12** are used as input for:
-
-- `VBM_extract_SE_tmaps_BD.R`
-
-### Mixed-Effects Meta-Analysis  
-To obtain meta-analytic statistics across datasets and sessions, a **mixed-effects meta-analysis** is performed, treating *session* and *dataset* as random effects:
-
-- `metanalisi-niftii_BD.R`
-
-**Note:** NIfTI files of tmaps and se for all cohorts are provided. NIfTI files corresponding to the effects shown in *Figure 5c–d* are included in this folder.  
-The figure was generated using **MRIcroGL**.
 
 ---
 
