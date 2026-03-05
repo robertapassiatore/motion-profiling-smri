@@ -89,7 +89,7 @@ for (sess in sessions) {
     
     # Perform random-effects meta-analysis
     res <- tryCatch(
-      metafor::rma(yi, vi, data = data.test, method = "ML"),
+      metafor::rma.mv(yi, vi, random = ~ study + session, data = data.test, method = "ML"),
       error = function(e) NULL
     )
     
