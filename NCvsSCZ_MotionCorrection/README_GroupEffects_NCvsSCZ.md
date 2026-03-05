@@ -26,4 +26,4 @@ The figure was generated using **ggseg** and code `plot_GroupDiff_NCvsSCZvsBD.R`
 
 ### Author  
 **Roberta Passiatore**  
-*Updated: 2025-03-05*  
+*Updated: 2026-03-05*  
